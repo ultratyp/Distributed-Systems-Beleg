@@ -1,8 +1,5 @@
 package de.htw.ds.sudoku;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
