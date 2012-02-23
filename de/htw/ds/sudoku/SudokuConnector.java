@@ -19,8 +19,8 @@ public final class SudokuConnector {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String SQL_INSERT_SUDOKU = "INSERT INTO Sudoku ('hash', 'digitsToSolve', 'digitsSolved') VALUES (?, ?, ?)";
-	private static final String SQL_SELECT_SUDOKU = "SELECT 'digitsToSolve' FROM Sudoku WHERE 'hash' = ?";
+	private static final String SQL_INSERT_SUDOKU = "INSERT INTO Sudoku (`hash`, `digitsToSolve`, `digitsSolved`) VALUES (?, ?, ?)";
+	private static final String SQL_SELECT_SUDOKU = "SELECT `digitsSolved` FROM Sudoku Sudoku WHERE `hash` = ?";
 	
 	private final Connection connection;
 
@@ -30,7 +30,6 @@ public final class SudokuConnector {
 	 */
 	public SudokuConnector(final Connection connection) {
 		this.connection = connection;
-
 	}
 
 	/**
@@ -50,15 +49,18 @@ public final class SudokuConnector {
 	 * @throws SQLException if there is a problem with the underlying JDBC connection
 	 */
 	
-	public void insertSolution(byte[] digitsToSolve, byte[] digitsSolved) throws SQLException {
+	public void storeSolution(byte[] digitsToSolve, byte[] digitsSolved) throws SQLException {
 		final PreparedStatement statement = this.connection.prepareStatement(SQL_INSERT_SUDOKU);
 		// TODO some validations on input data, throw new IllegalArgumentException();
 
-		final int hash = digitsToSolve.hashCode();
+		final String digitsToSolveAsString = new String(digitsToSolve);
+		final String digitsSolvedAsString = new String(digitsSolved);
+		final int hash = digitsToSolveAsString.hashCode();
 		statement.setInt(1, hash);
-		statement.setBytes(2, digitsToSolve);
-		statement.setBytes(3, digitsSolved);
+		statement.setString(2, digitsToSolveAsString);
+		statement.setString(3, digitsSolvedAsString);
 		
+		// TODO MySQLIntegrityConstraintViolationException
 		if(statement.executeUpdate() != 1) throw new IllegalStateException();
 	}
 	
@@ -68,26 +70,30 @@ public final class SudokuConnector {
 		// TODO invoke boolean querySolutions to make sure that a returnable Solutions byte Array exists. If so... 
 		
 		final PreparedStatement statement = this.connection.prepareStatement(SQL_SELECT_SUDOKU);
-		final int hash = digitsToSolve.hashCode();
+		
+		final String stringToHash = new String(digitsToSolve);
+		final int hash = stringToHash.hashCode();
 		statement.setInt(1, hash);
 		
 		final ResultSet resultSet = statement.executeQuery();
-		byte[] digitsSolved = new byte[0];
 	
-		while (resultSet.next()) {
-			 digitsSolved = resultSet.getBytes("digitsSolved");
+		if (resultSet.next()) {
+			return resultSet.getString("digitsSolved").getBytes();
 		}
-		return digitsSolved;
+		return new byte[0];
 	}
 
 	
 	public boolean solutionExists(byte[] digitsToSolve) throws SQLException {
 		
 		final PreparedStatement statement = this.connection.prepareStatement(SQL_SELECT_SUDOKU);
-		final int hash = digitsToSolve.hashCode();
-		statement.setInt(1, hash);	
-		return (statement.execute());
-			
+
+		final String digitsToSolveAsString = new String(digitsToSolve);
+		final int hash = digitsToSolveAsString.hashCode();
+		statement.setInt(1, hash);
+		
+		final ResultSet resultSet = statement.executeQuery();
+		return (resultSet.next());
 	}
 
 	

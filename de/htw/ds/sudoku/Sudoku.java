@@ -446,38 +446,38 @@ public final class Sudoku implements Cloneable, Serializable {
 
 		if (command == Command.CHECK || command == Command.SOLVE) {
 			
-			byte [] digitsToSolve = sudoku.getDigits();
+			final byte[] digitsToSolve = sudoku.getDigits();
 			try {
-				final URI SERVICE_URI = new URI(args[4]);
-				final SoapSudokuService proxy = Namespaces.createDynamicSoapServiceProxy(SoapSudokuService.class, SERVICE_URI);				
+				final URI SERVICE_URI = new URI("http://192.168.1.51:8808/de.htw.ds.sudoku.SoapSudokuService");
+				final SoapSudokuService proxy = Namespaces.createDynamicSoapServiceProxy(SoapSudokuService.class, SERVICE_URI);
 				if (proxy.solutionExists(digitsToSolve)) {
-			
-					//TODO format solution byte array to Sudoku solution type
-					sudoku.setDigits(ElementType.SECTOR, 0, proxy.getSolution(digitsToSolve));
+					byte[] solution = proxy.getSolution(digitsToSolve);
+					for (int i = 0; i < solution.length; i++) {
+						 sudoku.getDigits()[i] = solution[i];
+					}
 					System.out.print(sudoku);
+					System.out.println("read solution from database");	
+				} else {				
+					for (final Sudoku solution : sudoku.resolve()) {
+						final byte[] digitsSolved = solution.getDigits();
+						proxy.storeSolution(digitsToSolve, digitsSolved);
+						System.out.print(solution);
+					}
+					System.out.println("stored new solution");
 				}
 			}
-			catch (ArrayIndexOutOfBoundsException e) {
-				
-			}
-			catch (URISyntaxException e) {
-			}
-			catch (NullPointerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			} catch (JdbcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			} finally {
+			catch (final Exception e) {
 				for (final Sudoku solution : sudoku.resolve()) {
 					System.out.print(solution);
-				}	
+				}
+				System.out.println("coud not connect to server");
 			}
 		}
 		final long stop = System.currentTimeMillis();
 		System.out.println(stop - start);
 	}
+	
+	public final void setDigits(final byte[] digits) {
+		 
+		}
 }

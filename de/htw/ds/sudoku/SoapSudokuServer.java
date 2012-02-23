@@ -48,7 +48,7 @@ public class SoapSudokuServer implements SoapSudokuService{
 			try {
 				connection.setAutoCommit(false);
 				final SudokuConnector connector = new SudokuConnector(connection);
-				connector.insertSolution(digitsToSolve, digitsSolved);
+				connector.storeSolution(digitsToSolve, digitsSolved);
 				connection.commit();
 			} catch (final SQLException exception){
 				try { connection.rollback(); } catch (final Exception e) {}
@@ -131,7 +131,7 @@ public class SoapSudokuServer implements SoapSudokuService{
 		final DataSource dataSource = createDataSource(jdbcConnectionURI, args[3], args[4]);
 		final SoapSudokuServer server = new SoapSudokuServer(SOAPBinding.SOAP11HTTP_BINDING, soapServiceURI, dataSource);
 		try {
-			System.out.println("JAX-WS based shop server running.");
+			System.out.println("JAX-WS based sudoku server running.");
 			System.out.println("Service URI is " + soapServiceURI + ", data source URL is " + args[2] + ", type \"quit\" to stop.");
 			System.out.println("Startup time is " + (System.currentTimeMillis() - timeStamp) + "ms.");
 
