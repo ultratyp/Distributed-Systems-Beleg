@@ -45,6 +45,6 @@ public interface SoapSudokuService {
 	
 	boolean solutionExists (
 			@WebParam (name="digitsToSolve") byte[] digitsToSolve
-			) throws NullPointerException, IllegalStateException,JdbcException;
+			) throws NullPointerException, IllegalStateException, JdbcException;
 	
 }
