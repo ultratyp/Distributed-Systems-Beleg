@@ -448,7 +448,7 @@ public final class Sudoku implements Cloneable, Serializable {
 			
 			final byte[] digitsToSolve = sudoku.getDigits();
 			try {
-				final URI SERVICE_URI = new URI("http://192.168.1.51:8808/de.htw.ds.sudoku.SoapSudokuService");
+				final URI SERVICE_URI = new URI("http://141.45.207.103:8808/de.htw.ds.sudoku.SoapSudokuService");
 				final SoapSudokuService proxy = Namespaces.createDynamicSoapServiceProxy(SoapSudokuService.class, SERVICE_URI);
 				if (proxy.solutionExists(digitsToSolve)) {
 					byte[] solution = proxy.getSolution(digitsToSolve);

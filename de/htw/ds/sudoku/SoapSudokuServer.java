@@ -1,9 +1,16 @@
 package de.htw.ds.sudoku;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.ProtocolException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -17,6 +24,8 @@ import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import de.htw.ds.SocketAddress;
+import de.htw.ds.chat.CcpChatServer;
+import de.htw.ds.chat.ChatEntry;
 
 
 /**
@@ -32,14 +41,11 @@ public class SoapSudokuServer implements SoapSudokuService{
 	private final DataSource dataSource;
 	
 	public SoapSudokuServer(final String binding, final URI serviceURI, final DataSource dataSource) {
-		super();
 		if (dataSource == null) throw new NullPointerException();
 		this.dataSource = dataSource;
 		this.endpoint = Endpoint.create(binding, this);
 		this.endpoint.publish(serviceURI.toASCIIString());
  	}
-	
-	
 	
 	public void storeSolution(byte[] digitsToSolve, byte[] digitsSolved)
 			throws NullPointerException, IllegalStateException, JdbcException {
@@ -136,6 +142,10 @@ public class SoapSudokuServer implements SoapSudokuService{
 			System.out.println("Startup time is " + (System.currentTimeMillis() - timeStamp) + "ms.");
 
 			final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+//			final int servicePortForClosing = servicePort + 1;
+//			server.waitForShutdown(servicePortForClosing, "passwort");
+
 			try { while (!"quit".equals(reader.readLine())); } catch (final IOException exception) {}
 		} finally {
 			server.close();
@@ -181,5 +191,45 @@ public class SoapSudokuServer implements SoapSudokuService{
 		throw new JdbcException("MySql JDBC driver not installed.");
 	}
 	
-	
+	public void waitForShutdown(final int servicePort, final String password) {
+		final Socket connection;
+		final ServerSocket serviceSocket = new ServerSocket(servicePort);
+		try {
+			connection = serviceSocket.accept();
+		} catch (final SocketException exception) {
+			return;
+		}
+		try {
+			final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream());
+			final DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
+			final DataInputStream dataInputStream = new DataInputStream(connection.getInputStream());
+			
+			while (true) {
+				try {
+					final String method = dataInputStream.readUTF();
+					if (password.equals(method)) {
+						final String response = new String("ok");
+						dataOutputStream.writeUTF(response);
+						bufferedOutputStream.flush();
+						this.close();
+						break;
+					} else {
+						final String response = new String("fail");
+						dataOutputStream.writeUTF(response);
+						bufferedOutputStream.flush();
+					}
+				} catch (final Throwable exception) {
+					try { exception.printStackTrace(); } catch (final Throwable nestedException) {}
+				} finally {
+					break;
+				}
+			}
+			
+		} catch (final Throwable exception) {
+			try { exception.printStackTrace(); } catch (final Throwable nestedException) {}
+			return;
+		} finally {
+			try { connection.close(); } catch (final Throwable exception) {}
+		}
+	}
 }
