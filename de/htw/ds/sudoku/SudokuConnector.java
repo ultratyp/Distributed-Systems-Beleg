@@ -4,10 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 
 /**
@@ -16,8 +14,6 @@ import java.util.Set;
  * multiple method calls to operate within a single local transaction, if desired.</p>
  */
 public final class SudokuConnector {
-
-	private static final long serialVersionUID = 1L;
 
 	private static final String SQL_INSERT_SUDOKU = "INSERT INTO Sudoku (`hash`, `digitsToSolve`, `digitsSolved`) VALUES (?, ?, ?)";
 	private static final String SQL_SELECT_SUDOKU = "SELECT `digitsSolved` FROM Sudoku Sudoku WHERE `hash` = ?";
@@ -51,7 +47,6 @@ public final class SudokuConnector {
 	
 	public void storeSolution(byte[] digitsToSolve, byte[] digitsSolved) throws SQLException {
 		final PreparedStatement statement = this.connection.prepareStatement(SQL_INSERT_SUDOKU);
-		// TODO some validations on input data, throw new IllegalArgumentException();
 
 		final String digitsToSolveAsString = new String(digitsToSolve);
 		final String digitsSolvedAsString = new String(digitsSolved);
@@ -60,15 +55,15 @@ public final class SudokuConnector {
 		statement.setString(2, digitsToSolveAsString);
 		statement.setString(3, digitsSolvedAsString);
 		
-		// TODO MySQLIntegrityConstraintViolationException
-		if(statement.executeUpdate() != 1) throw new IllegalStateException();
+		try {
+			if(statement.executeUpdate() != 1) throw new IllegalStateException();
+		} catch (MySQLIntegrityConstraintViolationException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
 	public byte[] querySolution(byte[] digitsToSolve) throws SQLException {
-		
-		// TODO invoke boolean querySolutions to make sure that a returnable Solutions byte Array exists. If so... 
-		
 		final PreparedStatement statement = this.connection.prepareStatement(SQL_SELECT_SUDOKU);
 		
 		final String stringToHash = new String(digitsToSolve);

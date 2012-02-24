@@ -1,13 +1,10 @@
 package de.htw.ds.sudoku;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -186,39 +183,48 @@ public class SoapSudokuServer implements SoapSudokuService{
 	}
 	
 	public static void waitForShutdown(final int servicePort, final String password, final SoapSudokuServer server) {
-		while (true) {
-			try {
-				final Socket connection;
+		final ServerSocket serviceSocket;
+		try {
+			serviceSocket = new ServerSocket(servicePort);
+			while (true) {
 				try {
-					final ServerSocket serviceSocket = new ServerSocket(servicePort);
-					connection = serviceSocket.accept();
-				} catch (final SocketException exception) {
-					break;
-				}
-				try {
-					final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream());
-					final DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
-					final DataInputStream dataInputStream = new DataInputStream(connection.getInputStream());
-					
-						final String message = dataInputStream.readUTF();
-						if (password.equals(message)) {
-							final String response = new String("ok");
-							dataOutputStream.writeUTF(response);
-							bufferedOutputStream.flush();
-							break;
-						} else {
-							final String response = new String("fail");
-							dataOutputStream.writeUTF(response);
-							bufferedOutputStream.flush();
+					final Socket connection;
+					try {
+						connection = serviceSocket.accept();
+						try {
+							final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream());
+							final DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
+							final DataInputStream dataInputStream = new DataInputStream(connection.getInputStream());
+							
+							final String message = dataInputStream.readUTF();
+							if (password.equals(message)) {
+								final String response = new String("ok");
+								dataOutputStream.writeUTF(response);
+								bufferedOutputStream.flush();
+								break;
+							} else {
+								final String response = new String("fail");
+								dataOutputStream.writeUTF(response);
+								bufferedOutputStream.flush();
+							}
+							
+						} catch (final Throwable exception) {
+							try { exception.printStackTrace(); } catch (final Throwable nestedException) {}
+						} finally {
+							try {
+								connection.close();
+							}
+							catch (final Throwable nestedException) {}
 						}
-					
+					} catch (final SocketException exception) {
+					//	exception.printStackTrace();
+					}
 				} catch (final Throwable exception) {
-					try { exception.printStackTrace(); } catch (final Throwable nestedException) {}
-					try { connection.close(); } catch (final Throwable nestedException) {}
+				//	exception.printStackTrace();
 				}
-			} catch (final Throwable exception) {
-				exception.printStackTrace();
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
