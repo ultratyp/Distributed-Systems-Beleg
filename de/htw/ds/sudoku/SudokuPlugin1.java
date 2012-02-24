@@ -9,12 +9,25 @@ import de.htw.ds.TypeMetadata;
 
 /**
  * <p>Vector-Processing based implementation of the SudokuPlugin interface.</p>
+ * 
+ * Testergebnisse:
+ *
+ * Sudoku Plugin0 solve 3: 293ms, 587ms, 461ms, 408ms, 446ms
+ * 
+ * Sudoku Plugin0 check 3: 540ms, 706ms, 779ms, 670ms, 842ms
+ * Sudoku Plugin0 check 4: 1418ms, 1604ms, 1538ms
+ *
+ * Sudoku Plugin1 solve 3: 408ms, 526ms, 364ms, 619ms, 332ms 
+ * Sudoku Plugin1 solve 6: 1934ms, 1324ms, 1347ms, 1418ms, 1770ms
+ *
+ * Sudoku Plugin1 check 3: 3609ms, 3599ms, 3352ms, 5315ms, 2850ms
+ * Sudoku Plugin1 check 4: 26261ms, 31897ms
  */
 @TypeMetadata(copyright = "Hofmann, Evers & Guttandin, all rights reserved", version = "0.1.0", authors = "Philipp Hofmann / Christoph Guttandin / Justin Evers")
 public final class SudokuPlugin1 implements SudokuPlugin {
 	private Sudoku parent = null;
-	private static final int PROCESSOR_CUNT = Runtime.getRuntime().availableProcessors();
-	private static final Semaphore finishSemaphore = new Semaphore(PROCESSOR_CUNT);
+	private static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
+	private static final Semaphore finishSemaphore = new Semaphore(PROCESSOR_COUNT);
 
 	/**
 	 * {@inheritDoc}
@@ -57,9 +70,9 @@ public final class SudokuPlugin1 implements SudokuPlugin {
 				break;
 			}
 		}
-		finishSemaphore.acquireUninterruptibly(PROCESSOR_CUNT);
+		finishSemaphore.acquireUninterruptibly(PROCESSOR_COUNT);
 		
-		finishSemaphore.release(PROCESSOR_CUNT);
+		finishSemaphore.release(PROCESSOR_COUNT);
 
 		return result;
 	}
@@ -127,20 +140,4 @@ public final class SudokuPlugin1 implements SudokuPlugin {
 			}
 		}
 	}
-	
-	
-	
 }
-
-
-/* Speed Test!
- * dimension 3 :
- *	44ms plugin1
- *	28ms plugin0
- *
- *	dimension 6: 
- *	746 plugin1
- *	172 plugin0
- *
- */
-

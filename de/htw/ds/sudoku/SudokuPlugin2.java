@@ -9,11 +9,24 @@ import de.htw.ds.TypeMetadata;
 
 /**
  * <p>Single-threaded base implementation of the SudokuPlugin interface.</p>
+ * 
+ * Testergebnisse:
+ *
+ * Sudoku Plugin0 solve 3: 293ms, 587ms, 461ms, 408ms, 446ms
+ * 
+ * Sudoku Plugin0 check 3: 540ms, 706ms, 779ms, 670ms, 842ms
+ * Sudoku Plugin0 check 4: 1418ms, 1604ms, 1538ms
+ *
+ * Sudoku Plugin2 solve 3: 256ms, 503ms, 252ms, 544ms, 403ms
+ * Sudoku Plugin2 solve 6: 701ms, 532ms, 390ms, 547ms, 617ms
+ *
+ * Sudoku Plugin2 check 3: 664ms, 820ms, 706ms, 678ms, 992ms
+ * Sudoku Plugin2 check 4: 1448ms, 1685ms, 1445ms, 1587ms, 1403ms
  */
 @TypeMetadata(copyright = "2012 Christoph Guttandin, Philipp Hofmann, Justin Evers", version = "0.1.0", authors = "Christoph Guttandin, Philipp Hofmann, Justin Evers")
 public final class SudokuPlugin2 implements SudokuPlugin {
 	private Sudoku parent = null;
-	private static final int PROCESSOR_CUNT = Runtime.getRuntime().availableProcessors();
+	private static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
 
 
 	/**
@@ -82,7 +95,7 @@ public final class SudokuPlugin2 implements SudokuPlugin {
 		if (this.parent == null) throw new IllegalStateException();
 		final Set<Sudoku> result = new HashSet<Sudoku>();
 		final int averageRecursionDepth = 2;
-		if (PROCESSOR_CUNT >= Math.pow(averageRecursionDepth, recursionDepth + 1)) {
+		if (PROCESSOR_COUNT >= Math.pow(averageRecursionDepth, recursionDepth + 1)) {
 			resolveMultiThreated(recursionDepth, digitIndex, cellAlternatives, result);
 		} else {
 			resolveSingleThreated(recursionDepth, digitIndex, cellAlternatives, result);

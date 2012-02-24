@@ -25,6 +25,17 @@ import de.htw.ds.SocketAddress;
 
 /**
  * <p>Sudoku server class implementing a JAX-WS based server.
+ * 
+ * Testergebnisse für den SOAP Server mit Plugin0:
+ * 
+ * Dimension: 3 solve
+ * unbekannt: 1446ms, 1101ms, 1722ms, 1195ms, 907ms, 1327ms, 1814ms, 1317ms, 2044ms, 1264ms
+ * bekannt: 882ms
+ * 
+ * Dimension: 5 solve
+ * unbekannt: 2940ms, 810ms, 897ms, 885ms, 1067ms, 1029ms, 1234ms, 1729ms, 965ms, 1147ms
+ * bekannt: 848ms
+ * 
  */
 
 @WebService (endpointInterface="de.htw.ds.sudoku.SoapSudokuService", serviceName="SoapSudokuService", portName="SoapSudokuPort")
@@ -115,7 +126,7 @@ public class SoapSudokuServer implements SoapSudokuService{
 	
 	/**
 	 * Application entry point. The given runtime parameters must be a SOAP service port,a
-	 * SOAP service name, a JDBC connection URL, a database user-ID, a database password
+	 * SOAP service name, a JDBC connection URL, a database user-ID, a database password, the control socket port, the control password
 	 * 
 	 * @param args the given runtime arguments
 	 * @throws URISyntaxException if one of the given service URIs is malformed

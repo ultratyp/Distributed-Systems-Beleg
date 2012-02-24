@@ -32,6 +32,8 @@ public final class Sudoku implements Cloneable, Serializable {
 	public static enum Command {
 		CREATE, CHECK, SOLVE
 	}
+	
+	private static URI SERVICE_URI;
 
 	private static final Random RANDOMIZER = new Random();
 	private static final Set<Sudoku> EMPTY_SUDOKU_SET = Collections.unmodifiableSet(new HashSet<Sudoku>());
@@ -447,7 +449,7 @@ public final class Sudoku implements Cloneable, Serializable {
 			
 			final byte[] digitsToSolve = sudoku.getDigits();
 			try {
-				final URI SERVICE_URI = new URI("http://141.45.201.230:8808/de.htw.ds.sudoku.SoapSudokuService");
+				SERVICE_URI = new URI("http://141.45.201.230:8808/de.htw.ds.sudoku.SoapSudokuService");
 				final SoapSudokuService proxy = Namespaces.createDynamicSoapServiceProxy(SoapSudokuService.class, SERVICE_URI);
 				if (proxy.solutionExists(digitsToSolve)) {
 					byte[] solution = proxy.getSolution(digitsToSolve);

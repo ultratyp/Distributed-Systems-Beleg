@@ -1,5 +1,5 @@
--- MySQL definition and initialization script for shop service application
--- Copyright 2010-2011 Sascha Baumeister, all rights reserved
+-- MySQL definition and initialization script for sudoku service application
+
 SET CHARACTER SET latin1;
 DROP DATABASE IF EXISTS sudoku;
 CREATE DATABASE sudoku CHARACTER SET utf8;
